@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CHANGES, CHECKLIST, DOC_TYPES, PROOF, docType, inr, type DocStatus, type DocType } from "@/lib/arrive/catalog";
 import { ApiError, errMsg } from "@/lib/arrive/client";
-import { MAX_BYTES, checkPhoto, compress, isImage, isPdf, kb, type Quality } from "@/lib/arrive/image";
+import { MAX_BYTES, checkImage, compress, isImage, isPdf, kb, type Quality } from "@/lib/arrive/image";
 import type { StudentDoc, StudentState } from "@/lib/arrive/types";
 import { Button, Pill, Qr, Ring, Sheet, useToast } from "../ui";
 import { HelpLink, Top } from "./Shell";
@@ -116,7 +116,7 @@ function Sample({ t }: { t: DocType }) {
   );
 }
 
-type Pending = { kind: "large-image"; file: File; est: number } | { kind: "large-pdf"; file: File } | { kind: "photo"; file: File; q: Quality };
+type Pending = { kind: "large-image"; file: File; est: number } | { kind: "large-pdf"; file: File } | { kind: "quality"; file: File; q: Quality };
 
 export function DocDetail({ id }: { id: string }) {
   const s = useStudent();
@@ -149,24 +149,30 @@ export function DocDetail({ id }: { id: string }) {
     } finally { setPhase("idle"); }
   }
 
+  /** Size handling after the quality check: upload, offer to compress, or explain the PDF limit. */
+  async function proceed(file: File) {
+    setPend(null);
+    if (file.size <= MAX_BYTES) return send(file);
+    if (isPdf(file)) return setPend({ kind: "large-pdf", file });
+    setPhase("checking");
+    try { const c = await compress(file); setPend({ kind: "large-image", file, est: c.size }); }
+    catch (e) { toast(errMsg(e), "error"); } finally { setPhase("idle"); }
+  }
+
   async function handle(file: File | undefined) {
     if (!file) return;
     if (!isImage(file) && !isPdf(file)) return toast("Only PDF, JPG or PNG files are accepted.", "error");
     if (t!.photo && isPdf(file)) return toast("The photo must be an image (JPG or PNG), not a PDF.", "error");
-    setPhase("checking");
-    try {
-      if (file.size > MAX_BYTES) {
-        if (isPdf(file)) { setPend({ kind: "large-pdf", file }); return; }
-        const c = await compress(file);
-        setPend({ kind: "large-image", file, est: c.size });
-        return;
-      }
-      if (t!.photo) {
-        const q = await checkPhoto(file);
-        if (q.blurry || q.dark) { setPend({ kind: "photo", file, q }); return; }
-      }
-      await send(file);
-    } catch (e) { toast(errMsg(e), "error"); } finally { setPhase((p) => (p === "checking" ? "idle" : p)); }
+    // Every image is checked on the original file, before any compression.
+    if (isImage(file)) {
+      setPhase("checking");
+      let q: Quality | null = null;
+      try { q = await checkImage(file, t!.photo ? "photo" : "doc"); }
+      catch (e) { toast(errMsg(e), "error"); setPhase("idle"); return; }
+      setPhase("idle");
+      if (q.issues.length) return setPend({ kind: "quality", file, q });
+    }
+    await proceed(file);
   }
 
   async function shrinkAndSend(file: File) {
@@ -262,17 +268,22 @@ export function DocDetail({ id }: { id: string }) {
           <button className="btn ghost block" onClick={() => { setPend(null); pick.current?.click(); }}>Choose another file</button>
         </>}
       </Sheet>
-      <Sheet open={pend?.kind === "photo"} onClose={() => setPend(null)} title={pend?.kind === "photo" && pend.q.blurry ? "This photo looks blurry" : "This photo is too dark"}>
-        {pend?.kind === "photo" && <>
-          <div className="filecard">
+      <Sheet open={pend?.kind === "quality"} onClose={() => setPend(null)} title={pend?.kind === "quality" ? pend.q.issues[0].title : ""}>
+        {pend?.kind === "quality" && <>
+          <div className="filecard" data-sharp={pend.q.metrics.sharp} data-noise={pend.q.metrics.noise} data-bright={pend.q.metrics.bright} data-faces={pend.q.metrics.faces ?? "n/a"}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={pend.q.preview} alt="Preview of the photo you chose" />
-            <div className="grow"><b>{pend.file.name}</b><p className="small muted">{kb(pend.file.size)} · {pend.q.blurry ? "face not in focus" : ""}{pend.q.blurry && pend.q.dark ? ", " : ""}{pend.q.dark ? "not enough light" : ""}</p></div>
+            <img src={pend.q.preview} alt={t.photo ? "Preview of the photo you chose" : "Preview of the scan you chose"} />
+            <div className="grow"><b>{pend.file.name}</b><p className="small muted">{kb(pend.file.size)}</p></div>
           </div>
-          <p className="muted">Photos like this are usually rejected. Stand facing a window in daylight, against a plain light wall, and hold the phone still.</p>
-          <button className="btn accent block" onClick={() => { setPend(null); cam.current?.click(); }}><Camera size={16} />Take it again</button>
-          <button className="btn ghost block" onClick={() => { setPend(null); pick.current?.click(); }}><ImageIcon size={16} />Choose another photo</button>
-          <button className="linkbtn" style={{ alignSelf: "center" }} onClick={() => send(pend.file)}>Upload this one anyway</button>
+          <ul className="stack-sm" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
+            {pend.q.issues.map((i) => (
+              <li key={i.code} className="row" style={{ alignItems: "flex-start" }}><XCircle size={18} color="var(--bad)" style={{ flex: "none", marginTop: 2 }} /><span className="small"><b>{i.title}.</b> <span className="muted">{i.tip}</span></span></li>
+            ))}
+          </ul>
+          <p className="small muted">{t.photo ? "Photos like this are usually rejected, and you would have to upload again." : "If the verification team cannot read it, they will ask you to upload again."}</p>
+          <button className="btn accent block" onClick={() => { setPend(null); cam.current?.click(); }}><Camera size={16} />{t.photo ? "Take it again" : "Scan it again"}</button>
+          <button className="btn ghost block" onClick={() => { setPend(null); pick.current?.click(); }}><ImageIcon size={16} />Choose another {t.photo ? "photo" : "file"}</button>
+          <button className="linkbtn" style={{ alignSelf: "center" }} onClick={() => proceed(pend.file)}>Upload this one anyway</button>
         </>}
       </Sheet>
     </>

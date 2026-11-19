@@ -30,6 +30,7 @@ function describe(a: O["activity"][number]) {
     "help.reply": `${a.staff} replied to ${a.student}`,
     "room.inspect": `${a.staff} inspected a room`,
     "student.add": `${a.staff} added ${a.student}`,
+    "student.import": `${a.staff} imported ${a.detail} students from CSV`,
     "fee.confirm": `${a.staff} confirmed ${a.student}'s fee`,
   };
   return map[a.action] ?? (a.action.startsWith("ticket.") ? `${a.staff} marked ticket ${a.detail} ${a.action.split(".")[1]}` : a.action);

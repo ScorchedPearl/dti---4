@@ -1,10 +1,11 @@
 "use client";
 
-import { Plus, Search, Users } from "lucide-react";
+import { FileSpreadsheet, Plus, Search, Users } from "lucide-react";
 import { useState } from "react";
 import { api, errMsg } from "@/lib/arrive/client";
 import { Button, Empty, FormError, Pill, Sheet, Spinner, useToast } from "../ui";
 import { Head, useConsole, useStaffData } from "./ConsoleShell";
+import ImportStudents from "./ImportStudents";
 
 type S = { id: number; name: string; josaa: string; branch: string; category: string; fee_status: string; ok: number; total: number; pass: boolean; token: number | null };
 const BRANCHES = ["B.Tech IT", "B.Tech IT-BI", "B.Tech CSE", "B.Tech ECE"];
@@ -16,6 +17,7 @@ export function Students() {
   const [q, setQ] = useState("");
   const { data, setData } = useStaffData<{ students: S[] }>(`/api/staff/students?q=${encodeURIComponent(q)}`, 15000);
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [fee, setFee] = useState<S | null>(null);
   const [ref, setRef] = useState("");
@@ -43,6 +45,7 @@ export function Students() {
   return (
     <div className="c-page">
       <Head title="Students" sub="Everyone allotted to IIITA through JoSAA. Search by name or application number.">
+        {admin && <button className="btn ghost sm" onClick={() => setImporting(true)}><FileSpreadsheet size={16} />Import CSV</button>}
         {admin && <button className="btn sm" onClick={() => { setAdding(true); setErr(""); }}><Plus size={16} />Add student</button>}
       </Head>
       <div className="row" style={{ maxWidth: 420, position: "relative" }}>
@@ -68,6 +71,7 @@ export function Students() {
         )}
       </section>
 
+      <ImportStudents open={importing} onClose={() => setImporting(false)} onDone={(students) => { setQ(""); setData({ students }); refreshCounts(); }} />
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add a student">
         <form className="stack" onSubmit={add} noValidate>
           <label className="field">Full name (as in JoSAA)<input {...f("name")} autoComplete="off" /></label>

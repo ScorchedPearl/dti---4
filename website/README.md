@@ -34,7 +34,7 @@ npm run build && npm start
 
 | Email | Role | Can use |
 |---|---|---|
-| `admin@iiita.ac.in` | Admin | Everything, plus adding students and confirming fees |
+| `admin@iiita.ac.in` | Admin | Everything, plus adding or importing students and confirming fees |
 | `verify@iiita.ac.in` | Verifier | Document review, student list |
 | `desk@iiita.ac.in` | Desk and gate | Gate check-in, desks A, B, C, H |
 | `warden@iiita.ac.in` | Warden | Room inspections, repair tickets |
@@ -51,6 +51,10 @@ Student and staff sessions use different cookies, so you can be signed in as bot
 5. In **Desks**, staff call the next student; the student's phone shows a full-screen alert and vibrates. "Done" queues them at the next desk.
 6. After the hostel office, the student accepts the room, can report a problem (ticket `#R-1182` onwards), and the warden assigns and fixes it.
 7. Questions the FAQ cannot answer land in the **Help inbox** for a senior volunteer.
+
+### Loading the allotment list
+
+Admins open **Students → Import CSV** and upload the JoSAA / CSAB allotment export (or any sheet saved as CSV). Required columns: `josaa`, `dob`, `name`, `branch`, `phone`; optional: `category` (GEN if empty), `parent_name`, `parent_phone`. Common JoSAA headings ("Application No", "Candidate Name", "Allotted Program", "Mobile No"…) are recognised, dates can be `DD/MM/YYYY` or `YYYY-MM-DD`, and `+91` / leading `0` on phone numbers is removed. A preview lists new rows, students already added and rows with problems before anything is saved. Re-uploading the same file only adds new students. Template: `/students-template.csv`.
 
 ## Configuration
 
