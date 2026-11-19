@@ -1,6 +1,6 @@
 # IIITA Arrive: implementation plan
 
-Turns the Assignment 4 clickable prototype (`website/src/app/(site)/prototype`) into a working product,
+Converts the Assignment 4 clickable prototype (`website/src/app/(site)/prototype`) into a working product,
 while keeping the prototype and its usability-test kit as the A4 deliverable.
 
 Source of truth for scope: `handoff/1-prototype-nextjs.md` (screens, documents, tasks, copy) and
