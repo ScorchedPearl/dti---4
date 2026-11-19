@@ -4,6 +4,7 @@ import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { DESKS, ROOM_CHECKS, docsForCategory, type DocStatus } from "@/lib/arrive/catalog";
 import { hashPassword, passCode, token } from "./crypto";
+import { UPLOAD_DIR } from "./paths";
 
 // First-run data. The four Assignment 2 personas are real accounts, Ananya Verma is the
 // worked example from the A4 brief, and six students already wait at Desk B so the
@@ -60,7 +61,7 @@ function tinyPdf(line: string) {
 }
 
 export function seed(d: DatabaseSync) {
-  const uploads = path.join(process.env.ARRIVE_DATA_DIR ?? path.join(process.cwd(), ".data"), "uploads");
+  const uploads = UPLOAD_DIR;
   const pw = hashPassword(process.env.ARRIVE_STAFF_PASSWORD ?? "arrive-2026");
   const staff = d.prepare("INSERT INTO staff (email, name, title, role, desk, pass_hash) VALUES (?, ?, ?, ?, ?, ?)");
   staff.run("admin@iiita.ac.in", "Registration Office", "Admin", "admin", null, pw);

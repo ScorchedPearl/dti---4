@@ -1,17 +1,14 @@
 import "server-only";
 import { mkdirSync } from "node:fs";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { DATA_DIR, UPLOAD_DIR } from "./paths";
 import { seed } from "./seed";
 
 // One SQLite file for the whole product. Node's built-in driver is synchronous,
 // which suits short request handlers and keeps every write transactional.
 
-// Serverless hosts (Vercel, AWS Lambda) mount the app read-only; only the temp folder is writable.
-const SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
-export const DATA_DIR = process.env.ARRIVE_DATA_DIR ?? (SERVERLESS ? path.join(tmpdir(), "arrive") : path.join(process.cwd(), ".data"));
-export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
+export { DATA_DIR, UPLOAD_DIR };
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS students (

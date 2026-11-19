@@ -1,5 +1,6 @@
 import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
+import { devOtpAllowed } from "./sms";
 
 export class HttpError extends Error {
   constructor(public status: number, message: string, public extra?: Record<string, unknown>) {
@@ -32,7 +33,9 @@ export function route<P = Record<string, string>>(fn: Handler<P>) {
     } catch (e) {
       if (e instanceof HttpError) return NextResponse.json({ error: e.message, ...e.extra }, { status: e.status });
       console.error("[arrive]", req.method, req.nextUrl.pathname, e);
-      return NextResponse.json({ error: "Something went wrong on our side. Please try again." }, { status: 500 });
+      // In showcase mode there is nothing secret to hide, so say what actually failed. That makes a broken deploy easy to diagnose.
+      const cause = devOtpAllowed() ? ` (${e instanceof Error ? e.message : String(e)})`.slice(0, 260) : "";
+      return NextResponse.json({ error: `Something went wrong on our side. Please try again.${cause}` }, { status: 500 });
     }
   };
 }
