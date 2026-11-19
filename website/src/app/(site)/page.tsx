@@ -284,10 +284,16 @@ export default function Home() {
             <p className="lead">Three concepts, chosen by weighted scoring: fit with our POV, evidence, feasibility, whether it tests a hypothesis, and novelty. Each one is a proposal to prototype and test, not a finished product.</p>
           </Reveal>
           <SolutionVideo />
-          <Link href="/prototype" className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginTop: 24, textDecoration: "none", flexWrap: "wrap" }}>
-            <span><b style={{ fontSize: 19 }}>Try the Assignment 4 prototype</b><br /><span className="muted">Clickable ReadyPass and Gate-to-Room Pass, with a wireframe mode and a built-in usability-test kit.</span></span>
-            <span style={{ fontWeight: 600, color: "var(--teal)" }}>Open prototype →</span>
-          </Link>
+          <div className="grid2" style={{ marginTop: 24 }}>
+            <Link href="/prototype" className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12, textDecoration: "none" }}>
+              <span><b style={{ fontSize: 19 }}>Try the Assignment 4 prototype</b><br /><span className="muted">Clickable ReadyPass and Gate-to-Room Pass, with a wireframe mode and a built-in usability-test kit.</span></span>
+              <span style={{ fontWeight: 600, color: "var(--teal)" }}>Open prototype →</span>
+            </Link>
+            <a href="/app/login" className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12, textDecoration: "none" }}>
+              <span><b style={{ fontSize: 19 }}>Use IIITA Arrive, the working app</b><br /><span className="muted">Real sign-in, document uploads, staff review, slot booking, gate check-in, a live desk queue, room handover and a parent status link. <span style={{ whiteSpace: "nowrap" }}>Staff console at /staff.</span></span></span>
+              <span style={{ fontWeight: 600, color: "var(--teal)" }}>Open the app →</span>
+            </a>
+          </div>
           <div className="grid3" style={{ marginTop: 28 }}>
             {[
               { n: "ReadyPass", ps: "PS-1", c: "var(--blue)", s: "4.5", d: "A personalised checklist where every line is an upload slot with a status light. DigiLocker and JoSAA documents are accepted automatically, and a boarding-pass style “Ready to Report” QR pass is issued.", t: "Tests H1, H2" },
