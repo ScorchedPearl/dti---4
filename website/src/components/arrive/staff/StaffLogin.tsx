@@ -8,6 +8,7 @@ import { api, errMsg } from "@/lib/arrive/client";
 import { BrandPanel } from "../StudentLogin";
 import { Button, FormError } from "../ui";
 
+const DEMO_PASSWORD = "arrive-2026";
 const ROLES: [string, string][] = [
   ["admin@iiita.ac.in", "Admin"], ["verify@iiita.ac.in", "Verifier"], ["desk@iiita.ac.in", "Desk and gate"], ["warden@iiita.ac.in", "Warden"], ["senior@iiita.ac.in", "Senior volunteer"],
 ];
@@ -19,11 +20,11 @@ export default function StaffLogin({ demo }: { demo: boolean }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submit(e?: React.FormEvent, creds?: { email: string; password: string }) {
+    e?.preventDefault();
     setErr(""); setBusy(true);
     try {
-      await api("/api/staff/login", { json: { email, password } });
+      await api("/api/staff/login", { json: creds ?? { email, password } });
       router.replace("/staff");
       router.refresh();
     } catch (e) { setErr(errMsg(e)); setBusy(false); }
@@ -47,9 +48,9 @@ export default function StaffLogin({ demo }: { demo: boolean }) {
           </div>
           {demo && (
             <div className="card stack-sm" style={{ background: "var(--tint)" }}>
-              <b className="small">Development accounts</b>
-              <p className="tiny muted">Password is the one in <span className="mono">ARRIVE_STAFF_PASSWORD</span> (see README). Pick a role to fill the email:</p>
-              <div className="row wrap" style={{ gap: 6 }}>{ROLES.map(([e, r]) => <button type="button" key={e} className="btn ghost xs" onClick={() => setEmail(e)}>{r}</button>)}</div>
+              <b className="small">Showcase accounts</b>
+              <p className="tiny muted">This is a demo. Tap a role to sign in (the password is <span className="mono">{DEMO_PASSWORD}</span> if you type it).</p>
+              <div className="row wrap" style={{ gap: 6 }}>{ROLES.map(([e, r]) => <button type="button" key={e} className="btn ghost xs" disabled={busy} onClick={() => { setEmail(e); setPassword(DEMO_PASSWORD); submit(undefined, { email: e, password: DEMO_PASSWORD }); }}>{r}</button>)}</div>
             </div>
           )}
           <p className="auth-foot"><Link href="/app/login">Student sign in</Link> · <Link href="/">About this project</Link></p>

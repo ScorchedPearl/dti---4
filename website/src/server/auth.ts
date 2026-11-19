@@ -1,5 +1,7 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { createHmac } from "node:crypto";
+import { cookies, headers } from "next/headers";
+import { devOtpAllowed } from "./sms";
 import type { StaffRole } from "@/lib/arrive/catalog";
 import { db, now } from "./db";
 import { otpCode, safeEqual, sha256, token, verifyPassword } from "./crypto";
@@ -10,6 +12,7 @@ export const STAFF_COOKIE = "arrive_staff";
 const STUDENT_TTL = 14 * 24 * 3600_000;
 const STAFF_TTL = 12 * 3600_000;
 const OTP_TTL = 5 * 60_000;
+export const DEMO_CODE = "123456";
 
 export type Student = {
   id: number; josaa: string; dob: string; name: string; branch: string; category: string; phone: string;
@@ -18,29 +21,36 @@ export type Student = {
 export type Staff = { id: number; email: string; name: string; title: string; role: StaffRole; desk: string | null };
 
 /* ------------------------------------------------------------------ sessions */
+// Sessions are signed cookies, not database rows, so a sign-in survives on any server instance
+// (serverless hosts included). The seeded student and staff ids are the same on every instance.
+const SESSION_SECRET = process.env.ARRIVE_SESSION_SECRET ?? "iiita-arrive-showcase-secret";
+const sign = (p: string) => createHmac("sha256", SESSION_SECRET).update(p).digest("base64url");
+const makeToken = (kind: string, id: number, exp: number) => { const p = `${kind}.${id}.${exp}`; return `${p}.${sign(p)}`; };
+function readToken(t: string, kind: string): number | null {
+  const [k, id, exp, sig] = t.split(".");
+  if (!sig || k !== kind || !safeEqual(sig, sign(`${k}.${id}.${exp}`)) || Number(exp) < now()) return null;
+  return Number(id) || null;
+}
+
 async function startSession(kind: "student" | "staff", subjectId: number) {
-  const t = token();
   const ttl = kind === "student" ? STUDENT_TTL : STAFF_TTL;
-  db().prepare("DELETE FROM sessions WHERE expires_at < ?").run(now());
-  db().prepare("INSERT INTO sessions (token_hash, kind, subject_id, expires_at) VALUES (?, ?, ?, ?)").run(sha256(t), kind, subjectId, now() + ttl);
+  const t = makeToken(kind, subjectId, now() + ttl);
+  // Secure cookies in production, except when the site is opened over plain http on localhost (npm start).
+  const host = (await headers()).get("host") ?? "";
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
   (await cookies()).set(kind === "student" ? STUDENT_COOKIE : STAFF_COOKIE, t, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" && process.env.ARRIVE_INSECURE_COOKIES !== "1", path: "/", maxAge: ttl / 1000,
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" && process.env.ARRIVE_INSECURE_COOKIES !== "1" && !local, path: "/", maxAge: ttl / 1000,
   });
 }
 
 async function subject(kind: "student" | "staff") {
   const t = (await cookies()).get(kind === "student" ? STUDENT_COOKIE : STAFF_COOKIE)?.value;
   if (!t) return null;
-  const row = db().prepare("SELECT subject_id FROM sessions WHERE token_hash = ? AND kind = ? AND expires_at > ?").get(sha256(t), kind, now()) as { subject_id: number } | undefined;
-  return row?.subject_id ?? null;
+  return readToken(t, kind);
 }
 
 export async function endSession(kind: "student" | "staff") {
-  const jar = await cookies();
-  const name = kind === "student" ? STUDENT_COOKIE : STAFF_COOKIE;
-  const t = jar.get(name)?.value;
-  if (t) db().prepare("DELETE FROM sessions WHERE token_hash = ?").run(sha256(t));
-  jar.delete(name);
+  (await cookies()).delete(kind === "student" ? STUDENT_COOKIE : STAFF_COOKIE);
 }
 
 export async function currentStudent(): Promise<Student | null> {
@@ -80,6 +90,8 @@ const normDob = (s: string) => {
 export function requestOtp(josaa: string, dob: string) {
   const s = db().prepare("SELECT id, dob, phone FROM students WHERE josaa = ?").get(josaa.replace(/\s/g, "")) as { id: number; dob: string; phone: string } | undefined;
   if (!s || s.dob !== normDob(dob)) fail(400, "These details do not match your JoSAA record. Check the application number and date of birth.");
+  // Showcase mode: no real one-time code. The fixed demo code is returned so the app signs in at once.
+  if (devOtpAllowed()) return { studentId: s!.id, code: DEMO_CODE, phone: s!.phone };
   const recent = db().prepare("SELECT COUNT(*) n FROM otps WHERE student_id = ? AND created_at > ?").get(s!.id, now() - 10 * 60_000) as { n: number };
   if (recent.n >= 4) fail(429, "Too many codes requested. Wait 10 minutes and try again.");
   const code = otpCode();
@@ -91,6 +103,11 @@ export function requestOtp(josaa: string, dob: string) {
 export async function verifyOtp(josaa: string, code: string) {
   const s = db().prepare("SELECT id FROM students WHERE josaa = ?").get(josaa.replace(/\s/g, "")) as { id: number } | undefined;
   if (!s) fail(400, "Request a new code.");
+  if (devOtpAllowed()) {
+    if (code.trim() !== DEMO_CODE) fail(400, "That code is not right. In this demo the code is filled in for you.");
+    await startSession("student", s!.id);
+    return;
+  }
   const o = db().prepare("SELECT id, code_hash, expires_at, attempts FROM otps WHERE student_id = ? AND used = 0 ORDER BY id DESC LIMIT 1").get(s!.id) as { id: number; code_hash: string; expires_at: number; attempts: number } | undefined;
   if (!o || o.expires_at < now()) fail(400, "This code has expired. Request a new one.");
   if (o!.attempts >= 5) fail(429, "Too many wrong codes. Request a new one.");

@@ -14,6 +14,13 @@ const LIGHTS: [string, string, string][] = [
   ["#8796a8", "Class 12 marksheet", "To upload"],
 ];
 
+const DEMO_STUDENTS = [
+  { name: "Ananya Verma", note: "photo rejected · start here", j: "260310442817", d: "14/03/2008" },
+  { name: "Kabir Singh", note: "fee pending", j: "260310551203", d: "02/11/2007" },
+  { name: "Meera Nair", note: "documents in review", j: "260310778921", d: "09/09/2007" },
+  { name: "Rohan Iyer", note: "pass issued", j: "260310667734", d: "21/01/2008" },
+];
+
 export function BrandPanel({ title, text }: { title: string; text: string }) {
   return (
     <aside className="auth-brand">
@@ -49,25 +56,28 @@ export default function StudentLogin({ demo }: { demo: boolean }) {
 
   useEffect(() => { if (wait <= 0) return; const t = setTimeout(() => setWait((w) => w - 1), 1000); return () => clearTimeout(t); }, [wait]);
 
-  async function sendCode(e?: React.FormEvent) {
+  async function sendCode(e?: React.FormEvent, creds?: { j: string; d: string }) {
     e?.preventDefault();
     setErr("");
-    const j = josaa.replace(/\s/g, "");
+    const j = (creds?.j ?? josaa).replace(/\s/g, "");
+    const d = creds?.d ?? dob;
     if (!/^\d{12}$/.test(j)) return setErr("The JoSAA application number has 12 digits.");
-    if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dob.trim())) return setErr("Enter your date of birth as DD/MM/YYYY.");
+    if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d.trim())) return setErr("Enter your date of birth as DD/MM/YYYY.");
     setBusy(true);
     try {
-      const r = await api<{ phone: string; devCode?: string }>("/api/auth/otp", { json: { josaa: j, dob } });
+      const r = await api<{ phone: string; devCode?: string }>("/api/auth/otp", { json: { josaa: j, dob: d } });
+      // Showcase mode: the server hands back the demo code, so sign in straight away with no code screen.
+      if (demo && r.devCode) { await verify(r.devCode, j); return; }
       setPhone(r.phone); setDevCode(r.devCode); setStep("code"); setWait(30); setDigits(["", "", "", "", "", ""]);
       setTimeout(() => boxes.current[0]?.focus(), 50);
     } catch (e) { setErr(errMsg(e)); } finally { setBusy(false); }
   }
 
-  async function verify(code = digits.join("")) {
+  async function verify(code = digits.join(""), j = josaa.replace(/\s/g, "")) {
     if (code.length !== 6) return setErr("Enter all 6 digits.");
     setErr(""); setBusy(true);
     try {
-      await api("/api/auth/verify", { json: { josaa: josaa.replace(/\s/g, ""), code } });
+      await api("/api/auth/verify", { json: { josaa: j, code } });
       router.replace("/app");
       router.refresh();
     } catch (e) { setErr(errMsg(e)); setBusy(false); setDigits(["", "", "", "", "", ""]); boxes.current[0]?.focus(); }
@@ -114,11 +124,20 @@ export default function StudentLogin({ demo }: { demo: boolean }) {
                 <input inputMode="numeric" autoComplete="bday" placeholder="DD/MM/YYYY" value={dob} onChange={(e) => setDob(fmtDob(e.target.value))} />
               </label>
               <FormError>{err}</FormError>
-              <Button className="block" busy={busy} type="submit"><KeyRound size={18} />Send code and sign in</Button>
+              <Button className="block" busy={busy} type="submit"><KeyRound size={18} />{demo ? "Sign in" : "Send code and sign in"}</Button>
               {demo && (
-                <button type="button" className="linkbtn" style={{ alignSelf: "center" }} onClick={() => { setJosaa("260310442817"); setDob("14/03/2008"); setErr(""); }}>
-                  Fill in the example student (Ananya Verma)
-                </button>
+                <div className="card stack-sm" style={{ background: "var(--tint)" }}>
+                  <b className="small">Showcase students</b>
+                  <p className="tiny muted">This is a demo, so there is no real code. Tap a student to sign in.</p>
+                  <div className="stack-sm">
+                    {DEMO_STUDENTS.map((s) => (
+                      <button key={s.j} type="button" className="btn ghost sm" style={{ justifyContent: "space-between" }} disabled={busy}
+                        onClick={() => { setJosaa(s.j); setDob(s.d); sendCode(undefined, { j: s.j, d: s.d }); }}>
+                        <span>{s.name}</span><span className="tiny muted" style={{ fontWeight: 500 }}>{s.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </form>
           ) : (

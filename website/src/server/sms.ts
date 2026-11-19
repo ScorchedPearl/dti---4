@@ -19,5 +19,9 @@ export async function sendSms(to: string, text: string): Promise<boolean> {
   return r.ok;
 }
 
-/** Show OTPs on screen when no SMS provider is configured, outside production. */
-export const devOtpAllowed = () => process.env.ARRIVE_DEV_OTP === "1" || (process.env.NODE_ENV !== "production" && process.env.ARRIVE_DEV_OTP !== "0");
+/**
+ * Prototype mode: when no SMS provider delivers the code, show it on screen, in development and
+ * in production, so the whole workflow can be demonstrated on a deployed site. Set
+ * ARRIVE_DEV_OTP=0 to switch this off once a real SMS provider is configured.
+ */
+export const devOtpAllowed = () => process.env.ARRIVE_DEV_OTP !== "0";

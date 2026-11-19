@@ -58,10 +58,11 @@ Admins open **Students → Import CSV** and upload the JoSAA / CSAB allotment ex
 
 ## Configuration
 
-See `.env.example`. Everything works without configuration in development. For production:
+See `.env.example`. **The app runs in showcase mode by default, in development and on a deployed site**: students sign in with a tap (no real one-time code; the fixed demo code `123456` is used behind the scenes) and staff roles sign in with a tap (password `arrive-2026`). To turn the showcase off and require real codes, set `ARRIVE_DEV_OTP=0` and configure an SMS provider. Other settings:
 
-- `ARRIVE_STAFF_PASSWORD`: set before first start (it is hashed into the database when seeding).
-- `SMS_WEBHOOK_URL`: required for student sign-in in production (POST `{to, text}` to your SMS relay).
+- `ARRIVE_STAFF_PASSWORD`: set before first start (it is hashed into the database when seeding). If you change it, the one-tap staff buttons stop working.
+- `ARRIVE_SESSION_SECRET`: secret used to sign sign-in cookies. A fixed showcase default is used if unset.
+- `SMS_WEBHOOK_URL`: for real codes (POST `{to, text}` to your SMS relay). Not needed for the showcase.
 - `DIGILOCKER_CLIENT_ID`: partner credentials; otherwise the sandbox issuer is used and marked as such.
 - `ARRIVE_DATA_DIR`: persistent disk location for the database and uploads.
 
@@ -77,4 +78,4 @@ See `.env.example`. Everything works without configuration in development. For p
 
 ## Deploying
 
-The app runs as one Node server with a persistent disk (SQLite file + uploads), for example a small VM or a container with a volume. Serverless hosts such as Vercel do not keep local files between requests; move the data layer in `src/server` to Postgres and object storage first.
+**Showcase on any host, Vercel included.** The fixed demo users are seeded automatically, and sign-in uses signed cookies, so signing in works on every server instance with no database setup. On serverless hosts the data (uploads, document statuses, queue) lives in the instance's temporary folder: it is created and re-seeded on a cold start, so a demo starts fresh after the site has been idle. Use `ARRIVE_DATA_DIR` on a host with a persistent disk (a small VM, or a container with a volume) if changes must survive restarts, or if several people use it at once, because different serverless instances each keep their own copy of the data.
