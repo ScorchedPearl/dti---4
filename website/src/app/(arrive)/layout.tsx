@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Exo_2, Inter } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
 import "./arrive.css";
 
-const head = Exo_2({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--f-head" });
-const text = Inter({ subsets: ["latin"], variable: "--f-text" });
+// Anthropic's own typefaces (Tiempos, Styrene) are licensed; Newsreader and DM Sans are the closest open ones.
+const head = Newsreader({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--f-head" });
+const text = DM_Sans({ subsets: ["latin"], variable: "--f-text" });
+const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--f-mono" });
 
 export const metadata: Metadata = {
   title: { default: "IIITA Arrive", template: "%s · IIITA Arrive" },
@@ -11,11 +13,11 @@ export const metadata: Metadata = {
   applicationName: "IIITA Arrive",
 };
 
-export const viewport: Viewport = { themeColor: "#17375e", width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = { themeColor: "#f3f7fc", colorScheme: "light", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function ArriveRoot({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${head.variable} ${text.variable}`}>
+    <html lang="en" className={`${head.variable} ${text.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

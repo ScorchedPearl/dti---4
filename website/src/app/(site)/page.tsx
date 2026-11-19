@@ -10,6 +10,7 @@ import DefineVideo from "@/videos/DefineVideo";
 import IdeateVideo from "@/videos/IdeateVideo";
 import SolutionVideo from "@/videos/SolutionVideo";
 import TeamVideos from "@/components/TeamVideos";
+import CountUp from "@/components/CountUp";
 import data from "@/data/content.json";
 import styles from "./page.module.css";
 import { ArrowRight, ArrowUpRight, FileText, Play } from "lucide-react";
@@ -114,7 +115,7 @@ export default function Home() {
                   ["52", "brainstorm ideas on 3 boards"],
                 ].map(([v, l]) => (
                   <div key={l} className={styles.stat}>
-                    <b>{v}</b>
+                    <b><CountUp value={v} /></b>
                     <span>{l}</span>
                   </div>
                 ))}
@@ -285,15 +286,32 @@ export default function Home() {
           </Reveal>
           <SolutionVideo />
           <div className="grid2" style={{ marginTop: 24 }}>
-            <Link href="/prototype" className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12, textDecoration: "none" }}>
-              <span><b style={{ fontSize: 19 }}>Try the Assignment 4 prototype</b><br /><span className="muted">Clickable ReadyPass and Gate-to-Room Pass, with a wireframe mode and a built-in usability-test kit.</span></span>
-              <span style={{ fontWeight: 600, color: "var(--teal)" }}>Open prototype →</span>
+            <Link href="/prototype" className="linkcard">
+              <span className="linkcard-tag">Assignment 4 · clickable</span>
+              <span><b className="linkcard-title">Try the prototype</b><span className="muted">Clickable ReadyPass and Gate-to-Room Pass, with a wireframe mode and a built-in usability-test kit.</span></span>
+              <span className="linkcard-go">Open prototype <ArrowRight size={16} /></span>
             </Link>
-            <a href="/app/login" className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12, textDecoration: "none" }}>
-              <span><b style={{ fontSize: 19 }}>Use IIITA Arrive, the working app</b><br /><span className="muted">Real sign-in, document uploads, staff review, slot booking, gate check-in, a live desk queue, room handover and a parent status link. <span style={{ whiteSpace: "nowrap" }}>Staff console at /staff.</span></span></span>
-              <span style={{ fontWeight: 600, color: "var(--teal)" }}>Open the app →</span>
+            <a href="/app/login" className="linkcard featured">
+              <span className="linkcard-tag">Working app · live data</span>
+              <span><b className="linkcard-title">Use IIITA Arrive</b><span className="muted">Real sign-in, document uploads, staff review, slot booking, gate check-in, a live desk queue, room handover and a parent status link. <span style={{ whiteSpace: "nowrap" }}>Staff console at /staff.</span></span></span>
+              <span className="linkcard-go">Open the app <ArrowRight size={16} /></span>
             </a>
           </div>
+          <Reveal>
+            <div className="trycard">
+              <div>
+                <span className="linkcard-tag">Demo guide</span>
+                <h3 className="try-h">See the whole journey in about a minute</h3>
+                <p className="muted" style={{ margin: 0 }}>Run these on the working app. The sign-in page fills in an example student for you, and on a local server it shows the one-time code on screen.</p>
+              </div>
+              <ol className="try-steps">
+                <li><b>Sign in</b><span>Choose “Fill in the example student”, then enter the code shown.</span></li>
+                <li><b>Fix the photo</b><span>Open the rejected passport photo, read why, and upload a corrected one.</span></li>
+                <li><b>Get the pass</b><span>Finish the checklist, book a slot, and the Ready to Report pass unlocks.</span></li>
+                <li><b>Watch staff react</b><span>In the staff console (/staff), review the upload and call the next desk.</span></li>
+              </ol>
+            </div>
+          </Reveal>
           <div className="grid3" style={{ marginTop: 28 }}>
             {[
               { n: "ReadyPass", ps: "PS-1", c: "var(--blue)", s: "4.5", d: "A personalised checklist where every line is an upload slot with a status light. DigiLocker and JoSAA documents are accepted automatically, and a boarding-pass style “Ready to Report” QR pass is issued.", t: "Tests H1, H2" },
@@ -386,7 +404,37 @@ export default function Home() {
       </section>
 
       <footer className={styles.footer}>
-        <div className="container">IIITA Registration Experience · Group 10 · Design Thinking, July to December 2026</div>
+        <div className={`container ${styles.footTop}`}>
+          <div>
+            <b style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 500 }}>IIITA Registration Experience</b>
+            <p>Design Thinking project by Group 10, BTech V Sem, Section A. Empathize, Define and Ideate, explained with motion graphics.</p>
+          </div>
+          <div>
+            <h5>Explore</h5>
+            <ul>
+              {[["problem", "Problem"], ["empathize", "Empathize"], ["define", "Define · A2"], ["ideate", "Ideate · A3"], ["solution", "Solution"], ["team", "Team"]].map(([id, l]) => (
+                <li key={id}><a href={`#${id}`}>{l}</a></li>
+              ))}
+              <li><Link href="/prototype">Prototype · A4</Link></li>
+              <li><a href="/app/login">IIITA Arrive app</a></li>
+              <li><a href="/staff/login">Staff console</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Reports</h5>
+            <ul>
+              <li><a href="/docs/A1_Empathize_Group10.pdf" target="_blank" rel="noreferrer">Assignment 1 · Empathize</a></li>
+              <li><a href="/docs/A2_Define_Group10.pdf" target="_blank" rel="noreferrer">Assignment 2 · Define</a></li>
+              <li><a href="/docs/A3_Ideation_Group10.pdf" target="_blank" rel="noreferrer">Assignment 3 · Ideation</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className={styles.footBar}>
+          <div className="container" style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", justifyContent: "space-between" }}>
+            <span>IIITA Registration Experience · Group 10 · Design Thinking, July to December 2026</span>
+            <a href="#top" style={{ textDecoration: "none" }}>Back to top ↑</a>
+          </div>
+        </div>
       </footer>
     </>
   );

@@ -3,15 +3,17 @@
    Status colours are the product's language: grey to upload, amber in review, green accepted, red action needed. */
 
 :root {
-  --navy: #17375e; --navy-2: #0e2542; --navy-3: #234c7d; --teal: #1f6f78; --teal-2: #27888f; --teal-soft: #e3f1f1;
-  --ink: #10233b; --sub: #56677d; --faint: #8796a8; --line: #e2e7ee; --line-2: #d3dbe5; --bg: #f2f4f7; --card: #ffffff; --tint: #f7f9fb;
+  /* Palette follows the CodePlus light theme: soft blue-tinted page, white cards, hairline borders, navy-to-sky brand. */
+  --navy: #2f4fa3; --navy-2: #16233f; --navy-3: #3a5dab; --teal: #1f77b8; --teal-2: #2a8fd4; --teal-soft: #e6f1fb;
+  --ink: #16233f; --sub: #566379; --faint: #66758c; --line: #dbe5f1; --line-2: #c9d6e8; --bg: #f3f7fc; --card: #ffffff; --tint: #f8fafd;
+  --f-m: var(--f-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --ok: #16804a; --ok-bg: #e1f3e8; --rev: #9a5b00; --rev-bg: #fff0cf; --bad: #bf3528; --bad-bg: #fde6e2; --todo: #64748a; --todo-bg: #ecf0f5;
-  --focus: #3b82f6;
-  --r-lg: 20px; --r: 16px; --r-sm: 12px; --r-xs: 9px;
-  --sh-1: 0 1px 2px rgba(16, 35, 59, .05), 0 1px 1px rgba(16, 35, 59, .03);
-  --sh-2: 0 10px 30px -12px rgba(16, 35, 59, .22), 0 2px 6px rgba(16, 35, 59, .05);
-  --sh-3: 0 30px 60px -20px rgba(10, 25, 45, .45);
-  --f-h: var(--f-head), "Segoe UI", system-ui, sans-serif;
+  --focus: #2a8fd4;
+  --r-lg: 24px; --r: 20px; --r-sm: 14px; --r-xs: 10px;
+  --sh-1: none;
+  --sh-2: 0 16px 36px -26px rgba(22, 35, 63, .35);
+  --sh-3: 0 30px 60px -24px rgba(22, 35, 63, .4);
+  --f-h: var(--f-head), Georgia, "Times New Roman", serif;
   --f-b: var(--f-text), system-ui, -apple-system, sans-serif;
   --ease: cubic-bezier(.2, .8, .2, 1);
   color-scheme: light;
@@ -429,6 +431,96 @@ a.stat:hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
 .big-code { font-family: var(--f-h); font-size: 44px; font-weight: 800; letter-spacing: .14em; color: var(--navy); }
 .video { width: 100%; border-radius: 14px; background: #0b1726; aspect-ratio: 4 / 3; object-fit: cover; }
 
+/* ================================================================ CodePlus light restyle
+   Everything below only changes look and feel; no markup or behaviour is touched. */
+html { scroll-behavior: smooth; }
+::selection { background: #e6edf8; color: var(--navy); }
+
+/* type: serif headings at regular weight, mono labels */
+h1, h2, h3, h4 { font-weight: 500; text-wrap: balance; }
+.h1, .h2, .h3 { font-weight: 500; }
+.h1 { letter-spacing: -.025em; }
+.eyebrow, .side .group, .table th { font-family: var(--f-m); font-weight: 500; letter-spacing: .08em; }
+.topbar h1, .hero .big, .pass .pname, .now-card .title, .now-card .bignum, .stat .v, .alert-full .big, .big-code, .auth-brand h2 { font-weight: 500; }
+.token, .roomtile b, .desk-tabs .k, .step .n, .otp input, .logo, .settled h2 { font-weight: 600; }
+.card p, .msg, .banner { text-wrap: pretty; }
+
+/* controls: pills, hairlines, almost no shadow */
+.btn { border-radius: 99px; font-weight: 500; letter-spacing: 0; box-shadow: 0 1px 0 rgba(255,255,255,.25) inset; }
+.btn:not(.accent):not(.ghost):not(.soft):not(.danger):not(.light) { background: linear-gradient(100deg, #3a5dab 0%, #2a7cc4 60%, #2387c7 100%); }
+.btn.sm, .btn.xs { border-radius: 99px; }
+.btn.ghost:hover:not(:disabled) { border-color: #b9c9e0; }
+.iconbtn { border-radius: 50%; }
+.seg, .seg button { border-radius: 99px; }
+.tag { border-radius: 99px; background: #e6edf8; color: var(--navy); font-weight: 500; }
+.pill.navy { background: #e6edf8; }
+.card { border-radius: var(--r); }
+.card.lift { border-color: var(--line); }
+.input:focus, .field input:focus, .field select:focus, .field textarea:focus { box-shadow: 0 0 0 4px rgba(42, 143, 212, .18); }
+.slot[aria-checked="true"], .fixgrid button[aria-pressed="true"] { box-shadow: 0 0 0 3px rgba(42, 143, 212, .16); }
+.roomtile[aria-pressed="true"] { box-shadow: 0 0 0 3px rgba(47, 79, 163, .14); }
+.desk-tabs button[aria-pressed="true"] { background: #e6edf8; }
+.progress i { background: linear-gradient(90deg, #2f4fa3, #2a8fd4); }
+.skel { background: linear-gradient(90deg, #e7eff9 0%, #f3f7fc 50%, #e7eff9 100%); background-size: 200% 100%; }
+.step.now .n { box-shadow: 0 0 0 5px rgba(47, 79, 163, .14); }
+.logo { background: linear-gradient(140deg, #3a5dab, #2387c7); box-shadow: 0 6px 16px -8px rgba(47, 79, 163, .6); }
+.avatar { background: linear-gradient(140deg, #3a5dab, #2a8fd4); }
+.tabbar { background: rgba(255,255,255,.92); }
+.tabbar a[aria-current="page"] { color: var(--navy); }
+.tabbar a[aria-current="page"] .ti { background: #e6edf8; }
+.topbar { background: rgba(243, 247, 252, .86); }
+.composer { background: var(--bg); }
+
+/* hero cards: the navy-to-sky brand gradient instead of dark slabs */
+.pass { background: radial-gradient(120% 90% at 100% 0%, rgba(42,143,212,.6) 0%, transparent 55%), linear-gradient(160deg, #3a5dab 0%, #2f4fa3 55%, #243f87 100%); }
+.now-card { background: radial-gradient(100% 120% at 100% 0%, rgba(42,143,212,.6) 0%, transparent 60%), linear-gradient(160deg, #3a5dab, #2b4690); }
+.now-card .eyebrow { color: #cfe4fb; }
+.now-card .live, .pass .ready { color: #d6f5ee; }
+.alert-full { background: radial-gradient(120% 80% at 50% 0%, #4aa6e3, #2f4fa3 55%, #243f87); }
+.alert-full .eyebrow { color: #dbeafb; }
+.alert-full p { color: #e6f0fc; }
+
+/* light sidebars (student and staff) */
+.side .brand .tiny { color: var(--faint) !important; }
+@media (min-width: 960px) {
+  .side { background: #fff; color: var(--sub); border-right: 1px solid var(--line); }
+  .side .brand { color: var(--ink); }
+  .side .navl { color: var(--sub); border-radius: 99px; font-weight: 500; }
+  .side .navl:hover { background: var(--bg); color: var(--ink); }
+  .side .navl[aria-current="page"] { background: #e6edf8; color: var(--navy); box-shadow: none; }
+  .side .group { color: var(--faint); font-size: 11px; }
+  .side .who { background: var(--bg); }
+  .side .who b { color: var(--ink); }
+  .side .who button { color: var(--sub); }
+  .side .who button:hover { background: #fff; color: var(--ink); }
+  .topbar { background: rgba(243, 247, 252, .9); }
+}
+.c-side { background: #fff; color: var(--sub); border-bottom: 1px solid var(--line); }
+.c-side .brand { color: var(--ink); }
+.c-side .navl { color: var(--sub); border-radius: 99px; font-weight: 500; }
+.c-side .navl:hover { background: var(--bg); color: var(--ink); }
+.c-side .navl[aria-current="page"] { background: #e6edf8; color: var(--navy); }
+@media (min-width: 1000px) {
+  .c-side { border-bottom: 0; border-right: 1px solid var(--line); }
+  .c-side .who { background: var(--bg); }
+  .c-side .who b { color: var(--ink); }
+}
+
+/* sign-in page: the light CodePlus hero instead of a dark panel */
+@media (min-width: 960px) {
+  .auth-brand { color: var(--ink); background: linear-gradient(to bottom, transparent 70%, #fff 100%), linear-gradient(165deg, #cfe2fb 0%, #e9f2fd 50%, #fff 90%); border-right: 1px solid var(--line); }
+  .auth-brand::after { background-image: radial-gradient(rgba(22,35,63,.07) 1px, transparent 1px); }
+  .auth-brand h2 { color: var(--ink); }
+  .auth-brand p { color: var(--sub); }
+  .auth-brand .lt { background: rgba(255,255,255,.8); border-color: var(--line); color: var(--ink); }
+}
+
+/* a11y and polish */
+.btn:focus-visible, .iconbtn:focus-visible, .docrow:focus-visible, .slot:focus-visible { outline-offset: 3px; }
+.docrow:hover .dicon { transform: scale(1.04); }
+.docrow .dicon { transition: transform .2s var(--ease); }
+
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }
