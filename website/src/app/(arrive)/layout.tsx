@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, JetBrains_Mono, Newsreader } from "next/font/google";
+// Bundled fonts (no download at build time). Anthropic's own typefaces are licensed; these are the closest open ones.
+import "@fontsource-variable/newsreader/wght.css";
+import "@fontsource-variable/dm-sans/wght.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import "./arrive.css";
-
-// Anthropic's own typefaces (Tiempos, Styrene) are licensed; Newsreader and DM Sans are the closest open ones.
-const head = Newsreader({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--f-head" });
-const text = DM_Sans({ subsets: ["latin"], variable: "--f-text" });
-const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--f-mono" });
 
 export const metadata: Metadata = {
   title: { default: "IIITA Arrive", template: "%s · IIITA Arrive" },
@@ -17,7 +16,7 @@ export const viewport: Viewport = { themeColor: "#f3f7fc", colorScheme: "light",
 
 export default function ArriveRoot({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${head.variable} ${text.variable} ${mono.variable}`}>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

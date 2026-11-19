@@ -4,6 +4,9 @@
    because they carry meaning in the diagrams. */
 :root {
   color-scheme: light;
+  --font-display: "Newsreader Variable";
+  --font-body: "DM Sans Variable";
+  --font-mono: "JetBrains Mono";
   --ink: #16233f;
   --navy: #2f4fa3;
   --brand: #2f4fa3;

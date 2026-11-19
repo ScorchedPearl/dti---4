@@ -6,6 +6,7 @@
   /* Palette follows the CodePlus light theme: soft blue-tinted page, white cards, hairline borders, navy-to-sky brand. */
   --navy: #2f4fa3; --navy-2: #16233f; --navy-3: #3a5dab; --teal: #1f77b8; --teal-2: #2a8fd4; --teal-soft: #e6f1fb;
   --ink: #16233f; --sub: #566379; --faint: #66758c; --line: #dbe5f1; --line-2: #c9d6e8; --bg: #f3f7fc; --card: #ffffff; --tint: #f8fafd;
+  --f-head: "Newsreader Variable"; --f-text: "DM Sans Variable"; --f-mono: "JetBrains Mono";
   --f-m: var(--f-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --ok: #16804a; --ok-bg: #e1f3e8; --rev: #9a5b00; --rev-bg: #fff0cf; --bad: #bf3528; --bad-bg: #fde6e2; --todo: #64748a; --todo-bg: #ecf0f5;
   --focus: #2a8fd4;
